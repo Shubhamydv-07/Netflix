@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Netflix</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
+      }
+      body {
+        background-color: #1e1e1e;
+        color: white;
+        text-align: center;
+        padding: 20px;
+      }
+      .container {
+        max-width: 600px;
+        margin: auto;
+        padding: 20px;
+      }
+      h1 {
+        font-size: 32px;
+        margin-bottom: 20px;
+      }
+      .search-box {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+      .search-box input {
+        width: 70%;
+        padding: 10px;
+        font-size: 16px;
+        border-radius: 5px;
+        border: none;
+      }
+      .search-box button {
+        padding: 10px 15px;
+        font-size: 16px;
+        border: none;
+        background-color: #ff4757;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+      .search-box button:hover {
+        background-color: #ff6b81;
+      }
+      #body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      #cart {
+        background: #2c2c2c;
+        padding: 20px;
+        border-radius: 10px;
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+        box-shadow: 0 4px 10px rgba(255, 255, 255, 0.1);
+        transition: 0.3s;
+      }
+
+      #cart:hover {
+        transform: scale(1.05);
+      }
+
+      #cart img {
+        width: 100%;
+        border-radius: 10px;
+        margin-bottom: 15px;
+      }
+
+      p {
+        font-size: 18px;
+        margin: 5px 0;
+      }
+
+      #error-message {
+        color: red;
+        font-size: 18px;
+        margin-top: 10px;
+      }
+      a {
+        font-family: "Courier New", Courier, monospace;
+        font-size: 32px;
+        color: grey;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🎬 Movie Search</h1>
+      <a href="netflix2.htm">Watch List</a>
+      <div class="search-box">
+        <input type="text" id="inputtag" placeholder="Enter movie name..." />
+        <button onclick="fetchData()">🔍 Search</button>
+      </div>
+      <div id="message"></div>
+      <div id="body"></div>
+    </div>
+  </body>
+</html>
+<script>
+  let bag = [];
+  let fav = JSON.parse(localStorage.getItem("fav")) || [];
+  async function fetchData() {
+    let name = document.getElementById("inputtag").value;
+    let messageBox = document.getElementById("message");
+    let bodyContainer = document.getElementById("body");
+    // Clear previous data
+    messageBox.innerHTML = "";
+    bodyContainer.innerHTML = "";
+
+    if (name.trim() === "")
+      messageBox.innerHTML =
+        "<p style='color: red;'>⚠️ Please enter a movie name!</p>";
+
+    let res = await fetch(`https://www.omdbapi.com/?apikey=9915529b&t=${name}`);
+    let data = await res.json();
+
+    if (data.Response === "False")
+      messageBox.innerHTML = `<p id="error-message">❌ Movie not found. Try another name!</p>`;
+
+    displayData(data);
+  }
+
+  function displayData(movie) {
+    let cart = document.createElement("div");
+    cart.setAttribute("id", "cart");
+
+    let image = document.createElement("img");
+    image.setAttribute("src", movie.Poster);
+    image.setAttribute("alt", movie.Title);
+
+    let title = document.createElement("h1");
+    title.innerText = movie.Title;
+
+    let gener = document.createElement("p");
+    gener.innerText = `🎭 Genre: ${movie.Genre}`;
+
+    let lang = document.createElement("p");
+    lang.innerText = `🗣️ Language: ${movie.Language}`;
+
+    let rate = document.createElement("p");
+    rate.innerText = `⭐ IMDB Rating: ${movie.imdbRating}`;
+
+    let add = document.createElement("button");
+    add.innerText = "❤  Add to fav";
+
+    add.addEventListener("click", function () {
+      fav.push(movie);
+      localStorage.setItem("fav", JSON.stringify(fav));
+    });
+    cart.append(image, title, gener, lang, rate, add);
+    document.querySelector("#body").append(cart);
+  }
+</script>
